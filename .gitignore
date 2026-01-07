@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env
+
+# Chroma / vector DB data (optional but recommended)
+data/chroma/
+
+# Temporary files
+tmp/
+*.log
+
+# OS
+.DS_Store
