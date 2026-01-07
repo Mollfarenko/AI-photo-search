@@ -4,6 +4,7 @@ from embeddings.clip_model import load_clip_model
 from embeddings.text_embedder import embed_text
 from storage.chroma_store import get_chroma_client, get_collection
 from tools.metadata_filter import build_where_clause
+from tools.unified_search import unified_search
 
 
 logger = logging.getLogger(__name__)
@@ -84,7 +85,7 @@ def search_by_text_impl(
         return results
 
     except Exception as e:
-        logger.error(f"Search failed")
+        logger.error(f"Search failed: {e}", exc_info=True)
         return []
 
 
