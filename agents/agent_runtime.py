@@ -42,8 +42,6 @@ CRITICAL RULES (STRICTLY ENFORCED):
 Query Enhancement Rules:
 - Combine fragmented keywords into a natural visual description
 - Preserve ALL user-mentioned visual elements
-- DO NOT add new objects, locations, actions, or context
-- DO NOT infer metadata unless explicitly stated by the user
 
 Examples:
 
@@ -56,6 +54,13 @@ User: "montañas lago cielo azul nubes dron"
 Interpret as:
 "A high-altitude drone shot of mountains surrounding a lake, under a blue sky
 with large clouds."
+
+Decomposition Rule:
+- If the user requests multiple photos with mutually exclusive conditions
+  (e.g. sunrise and sunset, winter and summer, January and February),
+  treat them as separate searches.
+- In such cases, call the search tool multiple times,
+  once per distinct condition, and then combine the results.
 
 IMPORTANT - Photo Display Rules:
 - When search tools return results, they include 'photo_id' and metadata
@@ -297,4 +302,5 @@ def run_agent_image(image_path: str, query: Optional[str] = None) -> AgentResult
             "messages": [],
             "tool_calls": 0
         }
+
 
