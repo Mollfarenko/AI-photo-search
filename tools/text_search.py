@@ -96,7 +96,7 @@ search_by_text_tool = StructuredTool.from_function(
         "Search photos using a text description of visual content "
         "(e.g., 'beach sunset', 'mountain lake', 'people hiking').\n\n"
     
-        "Optional metadata filters (ONLY use if the user explicitly mentions them):\n"
+        "Optional metadata filters:\n"
         "- year: Integer year (e.g., 2023, 2024)\n"
         "- month: Integer 1-12 (1=January, 12=December)\n"
         "- time_of_day: 'morning', 'afternoon', 'evening', or 'night'\n"
@@ -107,3 +107,4 @@ search_by_text_tool = StructuredTool.from_function(
         "Do NOT guess camera information unless the user clearly mentions it."
     )
 )
+
