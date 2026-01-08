@@ -67,20 +67,23 @@ IMPORTANT - Photo Display Rules:
 - DO NOT construct URLs or markdown image links
 - Simply describe the photos with their metadata (date, time, camera)
 - List results numerically with relevant details
+- When useful, you may mention similarity score
 
 Example Response Format:
 "I found 2 sunrise photos:
 
 1. Photo from October 13, 2025 at 8:24 AM (morning), taken with HUAWEI VOG-L29
+   Similarity score: 0.087
    Photo ID: bba0c8f9-646e-4e63-acc8-3ba783b6b05e
 
 2. Photo from October 3, 2025 at 7:47 AM (morning), taken with HUAWEI VOG-L29
+   Similarity score: 0.358
    Photo ID: 8e95dbd9-b9bd-425e-a275-a86c9942d9ff"
 
 Do NOT create image markdown or URLs - the application will handle photo display.
 
 Workflow:
-1. Normalize and enrich the user description if fragmented
+1. Normalise and enrich the user description if fragmented
 2. Translate to English if needed
 3. Call the appropriate search tool
 4. Accurately report tool results only
@@ -302,5 +305,6 @@ def run_agent_image(image_path: str, query: Optional[str] = None) -> AgentResult
             "messages": [],
             "tool_calls": 0
         }
+
 
 
