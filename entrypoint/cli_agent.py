@@ -16,6 +16,7 @@ def main():
     print("="*60)
 
     photo_viewer = PhotoViewer()
+    url_generator = S3PhotoResolver()
 
     while True:
         user_input = input(f"\n{CYAN}You:{RESET} ")
@@ -50,6 +51,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
