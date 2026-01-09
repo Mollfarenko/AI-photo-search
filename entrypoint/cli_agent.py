@@ -29,11 +29,19 @@ def main():
         print(f"\n{GREEN}Agent:{RESET} {result['response']}")
 
         photos = result.get("photos", [])
+        tool_call_details = result.get("tool_call_details", [])
 
         stats = f"[{result.get('tool_calls', 0)} tool call(s)]"
         if photos:
             stats += f" • {len(photos)} photo(s) found"
         print(f"{GRAY}{stats}{RESET}")
+
+        # Show tool decisions
+        if tool_call_details:
+            print(f"\n{GRAY}[LLM → Tool decision]{RESET}")
+            for tc in tool_call_details:
+                args = ", ".join(f"{k}={v!r}" for k, v in tc["args"].items())
+                print(f"{GRAY}- {tc['name']}({args}){RESET}")
 
         if photos:
             choice = input(f"\n{YELLOW}Open photos in browser? (y/n):{RESET} ").lower()
@@ -42,6 +50,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
