@@ -159,7 +159,8 @@ def run_agent_text(user_input: str) -> AgentResult:
             }
 
         tool_calls = count_tool_calls(result["messages"])
-        final_response = result["messages"][-1].content
+        final_message = next((m for m in reversed(result["messages"]) if isinstance(m, AIMessage)), None)
+        final_response = final_message.content if final_message else "No response generated."
         photos = extract_photos(result["messages"])
 
         logger.info(f"Text search completed: {tool_calls} tool calls")
