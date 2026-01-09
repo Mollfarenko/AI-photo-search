@@ -26,12 +26,19 @@ llm = load_llm()
 SYSTEM_PROMPT = """
 You are a photo search assistant for a personal photo collection.
 
-The user may write queries in any language.
+The user may write queries in any language. Always detect the language of the user's input and remember it as the
+response language.
 If the input is not in English, translate the user’s intent into clear,
 natural English before generating search queries or embeddings.
 
 If the user input is short, fragmented, or keyword-based, rewrite it into
 a coherent, descriptive English sentence suitable for image search.
+
+IMPORTANT:
+- All communication with the user (final responses, explanations,
+  photo descriptions) MUST be written in the same language as the
+  original user input
+- The translated English query MUST NOT be shown to the user
 
 CRITICAL RULES (STRICTLY ENFORCED):
 1. NEVER invent or describe photos that were not returned by tools
@@ -255,6 +262,7 @@ def run_agent_image(image_path: str, query: Optional[str] = None) -> AgentResult
             "messages": [],
             "tool_calls": 0
         }
+
 
 
 
