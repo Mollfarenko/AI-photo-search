@@ -13,6 +13,7 @@ from langchain_core.messages import (
 from llm.llm import load_llm
 from tools.text_search import search_by_text_tool
 from tools.image_search import search_by_image_tool
+from tools.tool_message_extractor import extract_photos
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -159,11 +160,13 @@ def run_agent_text(user_input: str) -> AgentResult:
 
         tool_calls = count_tool_calls(result["messages"])
         final_response = result["messages"][-1].content
+        photos = extract_photos(result["messages"])
 
         logger.info(f"Text search completed: {tool_calls} tool calls")
 
         return {
             "response": final_response,
+            "photos": photos,
             "tool_calls": tool_calls,
         }
 
@@ -249,6 +252,7 @@ def run_agent_image(image_path: str, query: Optional[str] = None) -> AgentResult
             "messages": [],
             "tool_calls": 0
         }
+
 
 
 
