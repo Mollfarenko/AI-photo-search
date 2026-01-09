@@ -14,5 +14,16 @@ def extract_photos(messages: list[BaseMessage]) -> list[dict]:
                 pass
     return photos
 
+def extract_tool_calls(messages: list[BaseMessage]) -> list[dict]:
+    """Extract tool calls made by the LLM."""
+    tool_calls = []
+
+    for msg in messages:
+        if isinstance(msg, AIMessage) and msg.tool_calls:
+            tool_calls.extend(msg.tool_calls)
+
+    return tool_calls
+
+
 
 
