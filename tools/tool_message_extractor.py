@@ -1,4 +1,4 @@
-from langchain_core.messages import ToolMessage, BaseMessage
+from langchain_core.messages import ToolMessage, BaseMessage, AIMessage
 import json
 
 def extract_photos(messages: list[BaseMessage]) -> list[dict]:
@@ -23,6 +23,7 @@ def extract_tool_calls(messages: list[BaseMessage]) -> list[dict]:
             tool_calls.extend(msg.tool_calls)
 
     return tool_calls
+
 
 
 
