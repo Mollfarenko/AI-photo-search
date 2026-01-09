@@ -38,10 +38,11 @@ def main():
         if photos:
             choice = input(f"\n{YELLOW}Open photos in browser? (y/n):{RESET} ").lower()
             if choice in ("y", "yes"):
-                photo_viewer.show_photos(photos)
+                photo_viewer.show_photos(photos, url_generator)
 
 if __name__ == "__main__":
     main()
+
 
 
 
