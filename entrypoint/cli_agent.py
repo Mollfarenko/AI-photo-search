@@ -1,6 +1,6 @@
 # entrypoint/cli_agent.py
 from agents.agent_runtime import run_agent_text
-from tools.tool_message_extractor import extract_photos
+from tools.tool_message_extractor import extract_photos, extract_tool_calls
 from utilities.url_generator import S3PhotoResolver
 from utilities.photo_viewer import PhotoViewer
 
@@ -42,6 +42,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
