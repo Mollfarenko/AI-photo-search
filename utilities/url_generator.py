@@ -11,7 +11,7 @@ class S3PhotoResolver:
         self,
         bucket: str,
         key: str,
-        expires_in: int = 3600
+        expires_in: int = 180
     ) -> str | None:
         try:
             return self.s3_client.generate_presigned_url(
@@ -22,3 +22,4 @@ class S3PhotoResolver:
         except Exception as e:
             logger.error(f"Failed to generate presigned URL: {e}")
             return None
+
