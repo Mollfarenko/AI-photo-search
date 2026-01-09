@@ -1,4 +1,4 @@
-from langchain_core.messages import ToolMessage
+from langchain_core.messages import ToolMessage, BaseMessage
 import json
 
 def extract_photos(messages: list[BaseMessage]) -> list[dict]:
@@ -13,5 +13,6 @@ def extract_photos(messages: list[BaseMessage]) -> list[dict]:
             except:
                 pass
     return photos
+
 
 
