@@ -169,7 +169,7 @@ def run_agent_text(user_input: str) -> AgentResult:
         return {
             "response": final_response,
             "photos": photos,
-            "tool_call_details": tool_call_details
+            "tool_call_details": tool_call_details,
             "tool_calls": tool_calls,
         }
 
@@ -255,6 +255,7 @@ def run_agent_image(image_path: str, query: Optional[str] = None) -> AgentResult
             "messages": [],
             "tool_calls": 0
         }
+
 
 
 
