@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Photo Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(30, 30, 46, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            max-width: 1200px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        h1::before {
+            content: '🔍 ';
+        }
+
+        .search-section {
+            margin: 25px 0;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .search-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(138, 180, 248, 0.3);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #8ab4f8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #8ab4f8;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 20px rgba(138, 180, 248, 0.2);
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        input[type="file"] {
+            margin-bottom: 15px;
+            color: #ffffff;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]:hover {
+            border-color: #8ab4f8;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        input[type="file"]::file-selector-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #8ab4f8;
+            margin: 30px 0;
+            font-size: 18px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .result-section {
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .agent-response {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(138, 180, 248, 0.3);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .response-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #8ab4f8;
+            font-size: 18px;
+        }
+
+        .response-text {
+            line-height: 1.8;
+            color: #e0e0e0;
+            font-size: 15px;
+            white-space: pre-wrap;
+        }
+
+        .stats {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .photo-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(138, 180, 248, 0.3);
+            border-color: rgba(138, 180, 248, 0.5);
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-info {
+            padding: 15px;
+        }
+
+        .photo-date {
+            color: #8ab4f8;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .photo-time {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+        }
+
+        .photo-score {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.1);
+            color: #ff6b6b;
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(138, 180, 248, 0.3);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(138, 180, 248, 0.5);
+        }
+
+        .no-photos {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 40px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Photo Search</h1>
+
+        <!-- Text Search Section -->
+        <div class="search-section">
+            <div class="section-title">Search by Text</div>
+            <input type="text" id="textQuery" placeholder="Describe the photos you're looking for...">
+            <button onclick="searchByText()">Search</button>
+        </div>
+
+        <!-- Image Search Section -->
+        <div class="search-section">
+            <div class="section-title">Search by Image</div>
+            <input type="file" id="imageFile" accept="image/*">
+            <button onclick="searchByImage()">Upload & Search</button>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            ⏳ Searching...
+        </div>
+
+        <!-- Results -->
+        <div class="result-section" id="results">
+            <div class="agent-response">
+                <div class="response-title">Agent Response:</div>
+                <div class="response-text" id="agentResponse"></div>
+                <div class="stats" id="stats"></div>
+            </div>
+
+            <div id="photosContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        async function searchByText() {
+            const query = document.getElementById('textQuery').value.trim();
+
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            showLoading(true);
+            hideResults();
+
+            try {
+                const response = await fetch(`${API_URL}/search/text`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+
+            } catch (error) {
+                displayError(`Error: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function searchByImage() {
+            const fileInput = document.getElementById('imageFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select an image file');
+                return;
+            }
+
+            showLoading(true);
+            hideResults();
+
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch(`${API_URL}/search/image`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+
+            } catch (error) {
+                displayError(`Error: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayResults(data) {
+            const agentResponse = document.getElementById('agentResponse');
+            const stats = document.getElementById('stats');
+            const photosContainer = document.getElementById('photosContainer');
+            const results = document.getElementById('results');
+
+            // Show agent response
+            agentResponse.textContent = data.response;
+            stats.textContent = `Tool calls: ${data.tool_calls} | Photos found: ${data.photos.length}`;
+
+            // Display photos
+            if (data.photos && data.photos.length > 0) {
+                photosContainer.innerHTML = '<div class="photos-grid">' +
+                    data.photos.map(photo => `
+                        <div class="photo-card" onclick="window.open('${photo.photo_url}', '_blank')">
+                            <img src="${photo.thumbnail_url || photo.photo_url}" 
+                                 alt="Photo ${photo.photo_id}"
+                                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22200%22><rect fill=%22%23333%22 width=%22250%22 height=%22200%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 fill=%22%23666%22>No Image</text></svg>'">
+                            <div class="photo-info">
+                                <div class="photo-date">${formatDate(photo.taken_at)}</div>
+                                <div class="photo-time">${photo.period_of_day || 'Unknown time'}</div>
+                                ${photo.similarity_score ? `<div class="photo-score">Match: ${(photo.similarity_score * 100).toFixed(1)}%</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('') +
+                    '</div>';
+            } else {
+                photosContainer.innerHTML = '<div class="no-photos">No photos found</div>';
+            }
+
+            results.classList.add('show');
+        }
+
+        function displayError(message) {
+            const photosContainer = document.getElementById('photosContainer');
+            const results = document.getElementById('results');
+
+            document.getElementById('agentResponse').innerHTML = `<div class="error">${message}</div>`;
+            document.getElementById('stats').textContent = '';
+            photosContainer.innerHTML = '';
+
+            results.classList.add('show');
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            if (show) {
+                loading.classList.add('show');
+            } else {
+                loading.classList.remove('show');
+            }
+        }
+
+        function hideResults() {
+            document.getElementById('results').classList.remove('show');
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown date';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Allow Enter key to submit text search
+        document.getElementById('textQuery').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchByText();
+            }
+        });
+    </script>
+</body>
+</html>
