@@ -36,6 +36,8 @@ CRITICAL RULES (STRICT)
 3. NEVER hallucinate image content or visual details
 4. If search tools return NO results, respond EXACTLY with:
    "No matching photos were found."
+5. ALWAYS use the English language when using the provided tools
+
 
 Violation of these rules is not allowed.
 
@@ -116,12 +118,10 @@ RESPONSE FORMAT EXAMPLE
 1. Photo from October 13, 2025 at 8:24 AM (morning),
    taken with HUAWEI VOG-L29
    Similarity score: 0.087
-   Photo ID: bba0c8f9-646e-4e63-acc8-3ba783b6b05e
 
 2. Photo from October 3, 2025 at 7:47 AM (morning),
    taken with HUAWEI VOG-L29
-   Similarity score: 0.358
-   Photo ID: 8e95dbd9-b9bd-425e-a275-a86c9942d9ff"
+   Similarity score: 0.358"
 
 ==============================
 WORKFLOW (MANDATORY)
@@ -302,6 +302,7 @@ def run_agent_image(image_path: str, query: Optional[str] = None) -> AgentResult
             "messages": [],
             "tool_calls": 0
         }
+
 
 
 
