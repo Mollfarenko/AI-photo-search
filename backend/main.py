@@ -42,11 +42,16 @@ class PhotoResponse(BaseModel):
     period_of_day: str | None
     similarity_score: float | None
 
+class ToolCallDetail(BaseModel):
+    name: str
+    args: dict
+    id: str | None
 
 class SearchResponse(BaseModel):
     response: str
     photos: List[PhotoResponse]
     tool_calls: int
+    tool_call_details: List[ToolCallDetail] = []
 
 
 # -----------------------------------------------------------------------------
@@ -102,6 +107,7 @@ async def search_by_text(data: TextSearchRequest):
         response=result.get("response", ""),
         photos=photos_with_urls,
         tool_calls=result.get("tool_calls", 0),
+        tool_call_details=result.get("tool_call_details", []),
     )
 
 
@@ -122,6 +128,7 @@ async def search_by_image(image: UploadFile = File(...)):
             response=result.get("response", ""),
             photos=photos_with_urls,
             tool_calls=result.get("tool_calls", 0),
+            tool_call_details=result.get("tool_call_details", []),
         )
     finally:
         Path(tmp_path).unlink(missing_ok=True)
