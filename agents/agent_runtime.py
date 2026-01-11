@@ -245,14 +245,18 @@ def run_agent_image(image_path: str, query: Optional[str] = None) -> AgentResult
             }
 
         tool_calls = count_tool_calls(result["messages"])
-        final_response = result["messages"][-1].content
+        final_message = next((m for m in reversed(result["messages"]) if isinstance(m, AIMessage)), None)
+        final_response = final_message.content if final_message else "No response generated."
+        tool_call_details = extract_tool_calls(result["messages"])
+        photos = extract_photos(result["messages"])
 
         logger.info(f"Image search completed: {tool_calls} tool calls")
 
         return {
             "response": final_response,
+            "photos": photos,
+            "tool_call_details": tool_call_details,
             "tool_calls": tool_calls,
-            "messages": serialize_messages(result["messages"]),
         }
 
     except Exception as e:
@@ -262,6 +266,7 @@ def run_agent_image(image_path: str, query: Optional[str] = None) -> AgentResult
             "messages": [],
             "tool_calls": 0
         }
+
 
 
 
