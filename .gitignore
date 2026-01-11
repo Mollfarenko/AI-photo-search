@@ -3,12 +3,17 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.egg-info/
+pip-wheel-metadata/
 
 # Virtual environment
 venv/
+
+
+# Secrets
 .env
 
-# Chroma / vector DB data (optional but recommended)
+# Chroma / vector DB data
 data/chroma/
 
 # Temporary files
@@ -17,3 +22,12 @@ tmp/
 
 # OS
 .DS_Store
+
+# Docker (optional)
+*.dockerignore
+docker-compose.override.yml
+
+# IDEs
+.vscode/
+.idea/
+*.iml

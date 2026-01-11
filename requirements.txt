@@ -21,6 +21,9 @@ numpy
 pillow
 onnxruntime
 tqdm
+langgraph
+langchain-openai
+
 
 # Vector DB
 chromadb
