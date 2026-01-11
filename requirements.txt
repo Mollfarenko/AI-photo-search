@@ -2,6 +2,8 @@
 fastapi
 uvicorn
 python-dotenv
+boto3
+python-multipart
 
 # Async / HTTP
 anyio
