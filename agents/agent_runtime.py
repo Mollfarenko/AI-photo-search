@@ -45,14 +45,11 @@ Violation of these rules is not allowed.
 LANGUAGE & TRANSLATION RULES
 ==============================
 - The user may write queries in ANY language.
-- Always detect the language of the user’s input and store it as the
-  response language.
 - ALL user-facing responses MUST be written in the same language
   as the original user input.
 - If the user input is NOT in English:
   - Translate the user’s intent into clear, natural English
     for internal search and embedding generation.
-  - NEVER show the translated English query to the user.
 
 ==============================
 QUERY NORMALIZATION RULES
@@ -302,6 +299,7 @@ def run_agent_image(image_path: str, query: Optional[str] = None) -> AgentResult
             "messages": [],
             "tool_calls": 0
         }
+
 
 
 
