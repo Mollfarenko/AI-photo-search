@@ -345,152 +345,167 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8000';
+    const API_URL = 'http://localhost:8000';
 
-        async function searchByText() {
-            const query = document.getElementById('textQuery').value.trim();
+    async function searchByText() {
+        const query = document.getElementById('textQuery').value.trim();
 
-            if (!query) {
-                alert('Please enter a search query');
-                return;
-            }
-
-            showLoading(true);
-            hideResults();
-
-            try {
-                const response = await fetch(`${API_URL}/search/text`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ query: query })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                displayResults(data);
-
-            } catch (error) {
-                displayError(`Error: ${error.message}`);
-            } finally {
-                showLoading(false);
-            }
+        if (!query) {
+            alert('Please enter a search query');
+            return;
         }
 
-        async function searchByImage() {
-            const fileInput = document.getElementById('imageFile');
-            const file = fileInput.files[0];
+        showLoading(true);
+        hideResults();
 
-            if (!file) {
-                alert('Please select an image file');
-                return;
+        try {
+            const response = await fetch(`${API_URL}/search/text`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
             }
 
-            showLoading(true);
-            hideResults();
+            const data = await response.json();
+            displayResults(data);
 
-            try {
-                const formData = new FormData();
-                formData.append('image', file);
+        } catch (error) {
+            displayError(`Error: ${error.message}`);
+        } finally {
+            showLoading(false);
+        }
+    }
 
-                const response = await fetch(`${API_URL}/search/image`, {
-                    method: 'POST',
-                    body: formData
-                });
+    async function searchByImage() {
+        const fileInput = document.getElementById('imageFile');
+        const file = fileInput.files[0];
 
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                displayResults(data);
-
-            } catch (error) {
-                displayError(`Error: ${error.message}`);
-            } finally {
-                showLoading(false);
-            }
+        if (!file) {
+            alert('Please select an image file');
+            return;
         }
 
-        function displayResults(data) {
-            const agentResponse = document.getElementById('agentResponse');
-            const stats = document.getElementById('stats');
-            const photosContainer = document.getElementById('photosContainer');
-            const results = document.getElementById('results');
+        showLoading(true);
+        hideResults();
 
-            // Show agent response
-            agentResponse.textContent = data.response;
-            stats.textContent = `Tool calls: ${data.tool_calls} | Photos found: ${data.photos.length}`;
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
 
-            // Display photos
-            if (data.photos && data.photos.length > 0) {
-                photosContainer.innerHTML = '<div class="photos-grid">' +
-                    data.photos.map(photo => `
-                        <div class="photo-card" onclick="window.open('${photo.photo_url}', '_blank')">
-                            <img src="${photo.thumbnail_url || photo.photo_url}" 
-                                 alt="Photo ${photo.photo_id}"
-                                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22200%22><rect fill=%22%23333%22 width=%22250%22 height=%22200%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 fill=%22%23666%22>No Image</text></svg>'">
-                            <div class="photo-info">
-                                <div class="photo-date">${formatDate(photo.taken_at)}</div>
-                                <div class="photo-time">${photo.period_of_day || 'Unknown time'}</div>
-                                ${photo.similarity_score ? `<div class="photo-score">Match: ${(photo.similarity_score * 100).toFixed(1)}%</div>` : ''}
-                            </div>
-                        </div>
-                    `).join('') +
-                    '</div>';
-            } else {
-                photosContainer.innerHTML = '<div class="no-photos">No photos found</div>';
+            const response = await fetch(`${API_URL}/search/image`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
             }
 
-            results.classList.add('show');
+            const data = await response.json();
+            displayResults(data);
+
+        } catch (error) {
+            displayError(`Error: ${error.message}`);
+        } finally {
+            showLoading(false);
         }
+    }
 
-        function displayError(message) {
-            const photosContainer = document.getElementById('photosContainer');
-            const results = document.getElementById('results');
+    function displayResults(data) {
+        const agentResponse = document.getElementById('agentResponse');
+        const stats = document.getElementById('stats');
+        const photosContainer = document.getElementById('photosContainer');
+        const results = document.getElementById('results');
 
-            document.getElementById('agentResponse').innerHTML = `<div class="error">${message}</div>`;
-            document.getElementById('stats').textContent = '';
-            photosContainer.innerHTML = '';
-
-            results.classList.add('show');
-        }
-
-        function showLoading(show) {
-            const loading = document.getElementById('loading');
-            if (show) {
-                loading.classList.add('show');
-            } else {
-                loading.classList.remove('show');
-            }
-        }
-
-        function hideResults() {
-            document.getElementById('results').classList.remove('show');
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return 'Unknown date';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+        // Show agent response
+        agentResponse.textContent = data.response;
+        
+        // Build stats with tool call details
+        let statsHtml = `Tool calls: ${data.tool_calls} | Photos found: ${data.photos.length}`;
+        
+        // Add tool call details if present
+        if (data.tool_call_details && data.tool_call_details.length > 0) {
+            statsHtml += '<br><br><span style="color: #8ab4f8;">🔧 Tool Calls:</span><br>';
+            data.tool_call_details.forEach(tc => {
+                const args = Object.entries(tc.args)
+                    .map(([k, v]) => `${k}=${JSON.stringify(v)}`)
+                    .join(', ');
+                statsHtml += `<span style="color: rgba(255,255,255,0.6); font-size: 12px;">• ${tc.name}(${args})</span><br>`;
             });
         }
+        
+        stats.innerHTML = statsHtml;
 
-        // Allow Enter key to submit text search
-        document.getElementById('textQuery').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchByText();
-            }
+        // Display photos
+        if (data.photos && data.photos.length > 0) {
+            photosContainer.innerHTML = '<div class="photos-grid">' +
+                data.photos.map(photo => `
+                    <div class="photo-card" onclick="window.open('${photo.photo_url}', '_blank')">
+                        <img src="${photo.thumbnail_url || photo.photo_url}" 
+                             alt="Photo ${photo.photo_id}"
+                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22200%22><rect fill=%22%23333%22 width=%22250%22 height=%22200%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 fill=%22%23666%22>No Image</text></svg>'">
+                        <div class="photo-info">
+                            <div class="photo-date">${formatDate(photo.taken_at)}</div>
+                            <div class="photo-time">${photo.period_of_day || 'Unknown time'}</div>
+                            ${photo.similarity_score ? `<div class="photo-score">Match: ${(photo.similarity_score * 100).toFixed(1)}%</div>` : ''}
+                        </div>
+                    </div>
+                `).join('') +
+                '</div>';
+        } else {
+            photosContainer.innerHTML = '<div class="no-photos">No photos found</div>';
+        }
+
+        results.classList.add('show');
+    }
+
+    function displayError(message) {
+        const photosContainer = document.getElementById('photosContainer');
+        const results = document.getElementById('results');
+
+        document.getElementById('agentResponse').innerHTML = `<div class="error">${message}</div>`;
+        document.getElementById('stats').textContent = '';
+        photosContainer.innerHTML = '';
+
+        results.classList.add('show');
+    }
+
+    function showLoading(show) {
+        const loading = document.getElementById('loading');
+        if (show) {
+            loading.classList.add('show');
+        } else {
+            loading.classList.remove('show');
+        }
+    }
+
+    function hideResults() {
+        document.getElementById('results').classList.remove('show');
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return 'Unknown date';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
         });
-    </script>
+    }
+
+    // Allow Enter key to submit text search
+    document.getElementById('textQuery').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchByText();
+        }
+    });
+</script>
 </body>
 </html>
