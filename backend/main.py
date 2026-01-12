@@ -3,6 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from typing import List
+from fastapi.responses import HTMLResponse
+
+app = FastAPI()
+
+@app.get("/", response_class=HTMLResponse)
+def home():
+    with open("frontend/index.html", "r") as f:
+        return f.read()
+
 
 import tempfile
 from pathlib import Path
@@ -96,6 +105,13 @@ def attach_s3_urls(photos: list[dict]) -> list[PhotoResponse]:
 # -----------------------------------------------------------------------------
 # Routes
 # -----------------------------------------------------------------------------
+
+@app.get("/", response_class=HTMLResponse)
+def home():
+    with open("frontend/index.html", "r") as f:
+        return f.read()
+
+
 
 @app.post("/search/text", response_model=SearchResponse)
 async def search_by_text(data: TextSearchRequest):
