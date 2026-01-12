@@ -1,20 +1,11 @@
 from fastapi import FastAPI, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
 from typing import List
-from fastapi.responses import HTMLResponse
-
-app = FastAPI()
-
-@app.get("/", response_class=HTMLResponse)
-def home():
-    with open("frontend/index.html", "r") as f:
-        return f.read()
-
-
-import tempfile
 from pathlib import Path
+import tempfile
 
 from agents.agent_runtime import run_agent_text, run_agent_image
 from utilities.url_generator import S3PhotoResolver
@@ -25,18 +16,10 @@ from utilities.url_generator import S3PhotoResolver
 
 app = FastAPI(title="AI Photo Search API")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # tighten in prod
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 s3_resolver = S3PhotoResolver()
 
 # -----------------------------------------------------------------------------
-# Request / Response models
+# Models
 # -----------------------------------------------------------------------------
 
 class TextSearchRequest(BaseModel):
@@ -51,24 +34,39 @@ class PhotoResponse(BaseModel):
     period_of_day: str | None
     similarity_score: float | None
 
+
 class ToolCallDetail(BaseModel):
     name: str
     args: dict
     id: str | None
 
+
 class SearchResponse(BaseModel):
     response: str
     photos: List[PhotoResponse]
     tool_calls: int
-    tool_call_details: List[ToolCallDetail] = []
-
+    tool_call_details: List[ToolCallDetail] = Field(default_factory=list)
 
 # -----------------------------------------------------------------------------
-# Helpers
+# Static frontend
+# -----------------------------------------------------------------------------
+
+if Path("frontend").exists():
+    app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+@app.get("/")
+def root():
+    return FileResponse("frontend/index.html")
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
+
+# -----------------------------------------------------------------------------
+# API
 # -----------------------------------------------------------------------------
 
 def attach_s3_urls(photos: list[dict]) -> list[PhotoResponse]:
-    """Generate presigned URLs for photos returned by the agent."""
     enriched = []
 
     for photo in photos:
@@ -78,14 +76,12 @@ def attach_s3_urls(photos: list[dict]) -> list[PhotoResponse]:
 
         photo_url = (
             s3_resolver.generate_presigned_url(bucket, photo_key)
-            if bucket and photo_key
-            else None
+            if bucket and photo_key else None
         )
 
         thumbnail_url = (
             s3_resolver.generate_presigned_url(bucket, thumbnail_key)
-            if bucket and thumbnail_key
-            else None
+            if bucket and thumbnail_key else None
         )
 
         enriched.append(
@@ -102,26 +98,14 @@ def attach_s3_urls(photos: list[dict]) -> list[PhotoResponse]:
     return enriched
 
 
-# -----------------------------------------------------------------------------
-# Routes
-# -----------------------------------------------------------------------------
-
-@app.get("/", response_class=HTMLResponse)
-def home():
-    with open("frontend/index.html", "r") as f:
-        return f.read()
-
-
-
 @app.post("/search/text", response_model=SearchResponse)
 async def search_by_text(data: TextSearchRequest):
     result = await run_in_threadpool(run_agent_text, data.query)
-
-    photos_with_urls = attach_s3_urls(result.get("photos", []))
+    photos = attach_s3_urls(result.get("photos", []))
 
     return SearchResponse(
         response=result.get("response", ""),
-        photos=photos_with_urls,
+        photos=photos,
         tool_calls=result.get("tool_calls", 0),
         tool_call_details=result.get("tool_call_details", []),
     )
@@ -138,11 +122,11 @@ async def search_by_image(image: UploadFile = File(...)):
 
     try:
         result = await run_in_threadpool(run_agent_image, tmp_path)
-        photos_with_urls = attach_s3_urls(result.get("photos", []))
+        photos = attach_s3_urls(result.get("photos", []))
 
         return SearchResponse(
             response=result.get("response", ""),
-            photos=photos_with_urls,
+            photos=photos,
             tool_calls=result.get("tool_calls", 0),
             tool_call_details=result.get("tool_call_details", []),
         )
