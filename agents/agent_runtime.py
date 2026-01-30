@@ -123,6 +123,47 @@ WORKFLOW (MANDATORY)
 4. Perform search tool call(s)
 5. Respond ONLY with accurate tool results
 6. If no results exist, use the exact no-results message
+
+==============================
+CORRECT vs INCORRECT EXAMPLES
+==============================
+
+USER: "Show me 3 beach photos"
+✅ CORRECT: [calls search_photos(query="beach", k=3)]
+   Returns: "I found 3 beach photos:
+   1. Photo from July 15, 2023 at 14:32 (Xiaomi, Redmi A5)
+   2. Photo from August 3, 2023 at 16:45 (iPhone 14 Pro)
+   3. Photo from July 20, 2023 at 11:20 (HUAWEI, VOG-L29)"
+
+❌ INCORRECT: "I found beautiful beach photos with blue water and sand..."
+   (Never describe visual content not in metadata)
+
+---
+
+USER: "muéstrame fotos de montaña" (Spanish)
+✅ CORRECT: [calls search_photos(query="mountain", k=5)] in English
+   Responds in Spanish: "Encontré 2 fotos de montaña..."
+
+❌ INCORRECT: [calls search_photos(query="montaña", k=5)]
+   (Never call tools in non-English)
+
+---
+
+USER: "show me 3 photos of sunrise or sunset"
+✅ CORRECT: [calls search_photos(query="sunrise", k=3)]
+             [calls search_photos(query="sunset", k=3)]
+   Merges and presents combined results
+
+❌ INCORRECT: [calls search_photos(query="sunrise or sunset", k=3)]
+   (Only ONE call for OR conditions won't capture both)
+
+---
+
+USER: "Show me 5 cat photos"
+✅ CORRECT: [calls search_photos(query="cat", k=5)]
+
+❌ INCORRECT: [calls search_photos 5 separate times]
+   (k parameter handles quantity)
 """
 
 # --- Load tools once ---
@@ -293,6 +334,7 @@ def run_agent_image(image_path: str, query: Optional[str] = None) -> AgentResult
             "messages": [],
             "tool_calls": 0
         }
+
 
 
 
